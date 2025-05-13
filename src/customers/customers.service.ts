@@ -24,7 +24,8 @@ export class CustomersService {
     if (customerExists) {
       throw new BadRequestException('Customer already exists');
     }
-    return this.customerRepository.save(createCustomerDto);
+    const customer = this.customerRepository.create(createCustomerDto);
+    return this.customerRepository.save(customer);
   }
 
   async findAll(): Promise<Customer[]> {
@@ -47,11 +48,12 @@ export class CustomersService {
     return this.customerRepository.save(updatedCustomer);
   }
 
-  async remove(id: number) {
+  async remove(id: number): Promise<{ message: string }> {
     const customer = await this.customerRepository.findOne({ where: { id } });
     if (!customer) {
       throw new NotFoundException('Customer not found');
     }
-    return this.customerRepository.remove(customer);
+    this.customerRepository.remove(customer);
+    return { message: 'Customer deleted successfully' };
   }
 }

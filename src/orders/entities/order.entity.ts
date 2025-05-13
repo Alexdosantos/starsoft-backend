@@ -1,5 +1,5 @@
-import { Item } from 'src/items/entities/item.entity';
-import { OrderStatus } from 'src/enum/orderStatus';
+import { Item } from '../../items/entities/item.entity';
+import { OrderStatus } from '../../enum/orderStatus';
 import {
   Column,
   CreateDateColumn,
@@ -10,7 +10,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Customer } from 'src/customers/entities/customer.entity';
+import { Customer } from '../../customers/entities/customer.entity';
 
 @Entity('orders')
 export class Order {

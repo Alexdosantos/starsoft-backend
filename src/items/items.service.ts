@@ -13,11 +13,12 @@ export class ItemsService {
   ) {}
 
   async create(createItemDto: CreateItemDto): Promise<Item> {
-    return this.itemRepository.save(createItemDto);
+    const item = this.itemRepository.create(createItemDto);
+    return this.itemRepository.save(item);
   }
 
-  findAll(): Promise<Item[]> {
-    return this.itemRepository.find();
+  async findAll(): Promise<Item[]> {
+    return await this.itemRepository.find();
   }
 
   async findOne(id: number): Promise<Item> {
@@ -37,11 +38,12 @@ export class ItemsService {
     return this.itemRepository.save(updatedItem);
   }
 
-  async remove(id: number): Promise<Item> {
+  async remove(id: number): Promise<{ message: string }> {
     const item = await this.findOne(id);
     if (!item) {
       throw new NotFoundException('Item not found');
     }
-    return this.itemRepository.remove(item);
+    await this.itemRepository.remove(item);
+    return { message: 'Item deleted successfully' };
   }
 }
