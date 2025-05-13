@@ -9,12 +9,13 @@ import { LoggingInterceptor } from './logging/logging.intercertor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const config = app.get(ConfigService);
 
   app.connectMicroservice({
     transport: Transport.KAFKA,
     options: {
       client: {
-        brokers: ['localhost:9092'],
+        brokers: [config.get('KAFKA_BROKERS')],
         clientId: 'starsoft-client',
       },
       consumer: {
@@ -23,7 +24,6 @@ async function bootstrap() {
       },
     },
   });
-  const config = app.get(ConfigService);
   app.setGlobalPrefix('api/v1');
   app.enableCors();
 

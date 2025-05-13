@@ -24,8 +24,8 @@ export class OrdersService {
     private readonly elasticsearchService: ElasticsearchService,
   ) {}
 
-  onModuleInit() {
-    this.kafkaClient.subscribeToResponseOf('order.created');
+  async onModuleInit() {
+    await this.kafkaClient.connect();
   }
 
   async create(createOrderDto: CreateOrderDto, customerId: number) {

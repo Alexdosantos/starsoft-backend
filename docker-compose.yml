@@ -1,22 +1,30 @@
 version: '3.8'
 
 services:
+  zookeeper:
+    image: bitnami/zookeeper:latest
+    ports:
+      - "2181:2181"
+    restart: always
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    volumes:
+      - zookeeper_data:/bitnami/zookeeper
+
   kafka:
-    image: bitnami/kafka:latest
-    container_name: kafka
+    image: bitnami/kafka:3.6.1
     ports:
       - "9092:9092"
+    restart: always
     environment:
-      - KAFKA_CFG_NODE_ID=0
-      - KAFKA_CFG_PROCESS_ROLES=broker,controller
-      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
-      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTAINER://:29092,CONTROLLER://:9093
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092,CONTAINER://kafka:29092
-      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,CONTAINER:PLAINTEXT,CONTROLLER:PLAINTEXT
-      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
-      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT
-      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
-      - KAFKA_KRAFT_CLUSTER_ID=abcdefghiklmnopqrstuv
+      - KAFKA_ENABLE_KRAFT=no
+      - KAFKA_CFG_BROKER_ID=1
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    depends_on:
+      - zookeeper
     volumes:
       - kafka_data:/bitnami/kafka
 
@@ -26,7 +34,7 @@ services:
     ports:
       - "9000:9000"
     environment:
-      - KAFKA_BROKER_CONNECT=kafka:29092
+      - KAFKA_BROKER_CONNECT=kafka:9092
     depends_on:
       - kafka
 
@@ -40,7 +48,7 @@ services:
     ports:
       - "9200:9200"
     volumes:
-      - es_data:/usr/share/elasticsearch/data
+      - elasticsearch_data:/usr/share/elasticsearch/data
 
   kibana:
     image: docker.elastic.co/kibana/kibana:8.13.4
@@ -49,11 +57,36 @@ services:
       - "5601:5601"
     environment:
       - ELASTICSEARCH_URL=http://elasticsearch:9200
-  
     depends_on:
       - elasticsearch
 
+  postgres:
+    image: postgres:15
+    ports:
+      - "5433:5432"
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+
+  app:
+    build: .
+    env_file:
+      - .env
+    restart: always
+    depends_on:
+      - postgres
+      - kafka
+      - elasticsearch
+    ports:
+      - "5252:5252"
+    volumes:
+      - .:/app
 
 volumes:
+  postgres_data:
+  zookeeper_data:
   kafka_data:
-  es_data:
+  elasticsearch_data:

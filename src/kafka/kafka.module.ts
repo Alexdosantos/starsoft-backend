@@ -1,22 +1,29 @@
 import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
+import { Partitioners } from 'kafkajs';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    ClientsModule.register([
+    ClientsModule.registerAsync([
       {
         name: 'KAFKA_CLIENT',
-        transport: Transport.KAFKA,
-        options: {
-          client: {
-            brokers: ['localhost:9092'],
-            clientId: 'starsoft-client',
+        imports: [ConfigModule],
+        useFactory: (config: ConfigService) => ({
+          transport: Transport.KAFKA,
+          options: {
+            client: {
+              brokers: [config.get<string>('KAFKA_BROKERS')],
+              clientId: 'starsoft-client',
+            },
+            producer: {
+              allowAutoTopicCreation: true,
+              createPartitioner: Partitioners.LegacyPartitioner,
+            },
+            producerOnlyMode: true,
           },
-          producer: {
-            allowAutoTopicCreation: true,
-          },
-          producerOnlyMode: true,
-        },
+        }),
+        inject: [ConfigService],
       },
     ]),
   ],
