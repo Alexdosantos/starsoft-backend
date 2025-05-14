@@ -1,39 +1,30 @@
 import { CustomersService } from '../../customers/customers.service';
+import { customerMock } from './customerMock';
 
 export const customersServiceMock = {
   provide: CustomersService,
   useValue: {
     create: jest.fn().mockResolvedValue({
       id: 1,
-      name: 'John Doe',
-      email: 'john.doe@example.com',
-      phone: '123456789',
+      ...customerMock,
     }),
     findAll: jest.fn().mockResolvedValue([
       {
         id: 1,
-        name: 'John Doe',
-        email: 'john.doe@example.com',
-        phone: '123456789',
+        ...customerMock,
       },
     ]),
     findOne: jest.fn().mockResolvedValue({
       id: 1,
-      name: 'John Doe',
-      email: 'john.doe@example.com',
-      phone: '123456789',
+      ...customerMock,
     }),
     update: jest.fn().mockResolvedValue({
       id: 1,
-      name: 'John Doe',
-      email: 'john.doe@example.com',
-      phone: '123456789',
+      ...customerMock,
     }),
     merge: jest.fn().mockResolvedValue({
       id: 1,
-      name: 'John Doe',
-      email: 'john.doe@example.com',
-      phone: '123456789',
+      ...customerMock,
     }),
     remove: jest
       .fn()

@@ -5,6 +5,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { HttpExceptionFilter } from './filters/filter-exception';
 import { Transport } from '@nestjs/microservices';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { LoggingInterceptor } from './logging/logging.intercertor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -42,6 +43,7 @@ async function bootstrap() {
   );
 
   app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalInterceptors(new LoggingInterceptor());
 
   await app.startAllMicroservices();
   await app.listen(config.get('PORT') || 3001);

@@ -5,6 +5,7 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
+import { logger } from '../logging/winston.logger';
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -20,6 +21,20 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     const message =
       exception instanceof HttpException ? exception.getResponse() : exception;
+
+    const log = {
+      timestamp: new Date().toISOString(),
+      method: request.method,
+      url: request.url,
+      statusCode: status,
+      message: typeof message === 'string' ? message : JSON.stringify(message),
+      stack:
+        exception instanceof HttpException
+          ? exception.stack
+          : (exception as Error).stack,
+    };
+
+    logger.error(log);
 
     response.status(status).json({
       statusCode: status,

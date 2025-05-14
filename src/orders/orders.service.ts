@@ -9,7 +9,7 @@ import { Order } from './entities/order.entity';
 import { NotFoundException } from '@nestjs/common';
 import { CustomersService } from '../customers/customers.service';
 import { ItemsService } from '../items/items.service';
-import { OrderStatus } from 'src/enum/orderStatus';
+import { OrderStatus } from '../enum/orderStatus';
 import { ElasticsearchService } from '@nestjs/elasticsearch';
 
 @Injectable()
@@ -67,12 +67,12 @@ export class OrdersService {
     return savedOrder;
   }
 
-  findAll() {
-    return this.orderRepository.find();
+  async findAll() {
+    return await this.orderRepository.find();
   }
 
-  findOne(id: number) {
-    const order = this.orderRepository.findOne({ where: { id } });
+  async findOne(id: number) {
+    const order = await this.orderRepository.findOne({ where: { id } });
     if (!order) {
       throw new NotFoundException(`Order with ID ${id} not found`);
     }
@@ -126,6 +126,8 @@ export class OrdersService {
       index: 'orders',
       id: order.id.toString(),
     });
-    return order;
+    return {
+      message: 'Order deleted successfully',
+    };
   }
 }

@@ -37,9 +37,7 @@ export class OrdersController {
   create(
     @Body() createOrderDto: CreateOrderDto,
     @Param('customerId') customerId: string,
-    @Payload() payload: any,
   ) {
-    console.log(payload);
     return this.ordersService.create(createOrderDto, +customerId);
   }
 
