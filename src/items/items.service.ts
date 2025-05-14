@@ -4,6 +4,7 @@ import { UpdateItemDto } from './dto/update-item.dto';
 import { Repository } from 'typeorm/repository/Repository';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Item } from './entities/item.entity';
+import { ILike } from 'typeorm';
 
 @Injectable()
 export class ItemsService {
@@ -17,12 +18,45 @@ export class ItemsService {
     return this.itemRepository.save(item);
   }
 
-  async findAll(): Promise<Item[]> {
-    return await this.itemRepository.find();
+  async findAll(
+    id?: number,
+    name?: string,
+    price?: number,
+    page?: number,
+    limit?: number,
+  ): Promise<{
+    items: Item[];
+    totalItems: number;
+    totalPages: number;
+    currentPage: number;
+  }> {
+    if (!page) page = 1;
+    if (!limit) limit = 10;
+
+    const [result, totalItems] = await this.itemRepository.findAndCount({
+      where: {
+        ...(id && { id }),
+        ...(name && { name: ILike(`%${name}%`) }),
+        ...(price && { price }),
+      },
+      relations: ['order'],
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    return {
+      totalItems: totalItems,
+      totalPages: Math.ceil(totalItems / limit),
+      currentPage: page,
+      items: result,
+    };
   }
 
   async findOne(id: number): Promise<Item> {
-    const item = await this.itemRepository.findOne({ where: { id } });
+    const item = await this.itemRepository.findOne({
+      where: { id },
+      relations: ['order'],
+    });
     if (!item) {
       throw new NotFoundException('Item not found');
     }

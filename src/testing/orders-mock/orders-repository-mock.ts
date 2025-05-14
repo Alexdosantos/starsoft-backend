@@ -9,6 +9,7 @@ export const ordersRepositoryMock = {
     save: jest.fn().mockResolvedValue({ id: 1, ...orderMock }),
     find: jest.fn().mockResolvedValue({ id: 1, ...orderMock }),
     findOne: jest.fn().mockResolvedValue({ id: 1, ...orderMock }),
+    findAndCount: jest.fn().mockResolvedValue([[], 0]),
     update: jest.fn(),
     merge: jest.fn(),
     remove: jest.fn(),

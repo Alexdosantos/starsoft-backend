@@ -1,6 +1,6 @@
 # 🚀 Backend Starsoft
 
-Este é o backend do projeto **Starsoft**, desenvolvido com Node.js e TypeORM, utilizando uma arquitetura robusta baseada em microserviços e ferramentas modernas de mensageria, busca e monitoramento.
+Este é o backend do projeto **Starsoft**, desenvolvido com NestJS e TypeORM, utilizando uma arquitetura robusta e ferramentas modernas de mensageria, busca e monitoramento.
 
 ## 📦 Tecnologias e Serviços
 
@@ -12,6 +12,7 @@ Este projeto utiliza os seguintes serviços via `docker-compose`:
 - **Kafdrop** – UI para monitoramento dos tópicos Kafka
 - **Elasticsearch** – Motor de busca para indexação e consultas avançadas
 - **Kibana** – Interface para visualização e análise de dados do Elasticsearch
+- **Winston** – Logger para registro de eventos e mensagens
 
 ---
 

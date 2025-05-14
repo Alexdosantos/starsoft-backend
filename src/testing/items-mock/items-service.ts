@@ -28,8 +28,6 @@ export const itemsServiceMock = {
     }),
     remove: jest
       .fn()
-      .mockImplementation((id: number) =>
-        Promise.resolve({ message: 'Item deleted successfully' }),
-      ),
+      .mockResolvedValue({ message: 'Item deleted successfully' }),
   },
 };

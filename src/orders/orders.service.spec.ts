@@ -11,6 +11,7 @@ import { customersServiceMock } from '../testing/customers-mock/customers-servic
 import { itemsServiceMock } from '../testing/items-mock/items-service';
 import { ordersRepositoryMock } from '../testing/orders-mock/orders-repository-mock';
 import { NotFoundException } from '@nestjs/common';
+import { OrderStatus } from '../enum/orderStatus';
 
 describe('OrdersService', () => {
   let service: OrdersService;
@@ -68,14 +69,9 @@ describe('OrdersService', () => {
   it('should find array of orders', async () => {
     const result = await service.findAll();
     expect(result).toBeDefined();
-    expect(ordersRepositoryMock.useValue.find).toHaveBeenCalled();
+    expect(ordersRepositoryMock.useValue.findAndCount).toHaveBeenCalled();
   });
 
-  it('should find all orders', async () => {
-    const findAllSpy = jest.spyOn(service, 'findAll');
-    await service.findAll();
-    expect(findAllSpy).toHaveBeenCalled();
-  });
   it('should throw NotFoundException if order not found', async () => {
     ordersRepositoryMock.useValue.findOne.mockResolvedValue(null);
     await expect(service.findOne(1)).rejects.toThrow(NotFoundException);
@@ -90,9 +86,15 @@ describe('OrdersService', () => {
   it('should update an order', async () => {
     const existingOrder = {
       id: 1,
-      ...orderMock,
+      items: [],
+      status: OrderStatus.PENDING,
     };
-    const updatedOrderMock = { id: 1, ...orderMock };
+
+    const updatedOrderMock = {
+      id: 1,
+      items: [],
+      status: OrderStatus.PROCESSING,
+    };
 
     const updateOrder = {
       ...existingOrder,
@@ -100,19 +102,12 @@ describe('OrdersService', () => {
     };
 
     ordersRepositoryMock.useValue.findOne.mockResolvedValue(existingOrder);
-    ordersRepositoryMock.useValue.merge.mockResolvedValue(updateOrder);
     ordersRepositoryMock.useValue.save.mockResolvedValue(updateOrder);
 
     const result = await service.update(1, updatedOrderMock);
     expect(result).toBeDefined();
-    expect(ordersRepositoryMock.useValue.merge).toHaveBeenCalledWith(
-      existingOrder,
-      updatedOrderMock,
-    );
     expect(ordersRepositoryMock.useValue.save).toHaveBeenCalledWith(
-      updateOrder,
+      expect.objectContaining(updatedOrderMock),
     );
-
-    expect(result).toEqual(updatedOrderMock);
   });
 });

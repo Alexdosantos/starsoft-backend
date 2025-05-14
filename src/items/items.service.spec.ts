@@ -53,7 +53,7 @@ describe('ItemsService', () => {
   it('should find all items', async () => {
     const result = await service.findAll();
     expect(result).toBeDefined();
-    expect(itemsRepositoryMock.useValue.find).toHaveBeenCalled();
+    expect(itemsRepositoryMock.useValue.findAndCount).toHaveBeenCalled();
   });
 
   it('should find a specific item by ID', async () => {
@@ -63,6 +63,7 @@ describe('ItemsService', () => {
     expect(result).toEqual(itemMock);
     expect(itemsRepositoryMock.useValue.findOne).toHaveBeenCalledWith({
       where: { id: 1 },
+      relations: ['order'],
     });
   });
 

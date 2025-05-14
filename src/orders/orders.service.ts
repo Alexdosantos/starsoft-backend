@@ -1,9 +1,9 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { ClientKafka } from '@nestjs/microservices';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { Order } from './entities/order.entity';
 
 import { NotFoundException } from '@nestjs/common';
@@ -36,7 +36,6 @@ export class OrdersService {
 
     const { items, ...orderData } = createOrderDto;
 
-    // Verifica se todos os itens existem
     const orderItems = await Promise.all(
       items.map(async (itemId) => {
         const item = await this.itemsService.findOne(itemId);
@@ -67,12 +66,43 @@ export class OrdersService {
     return savedOrder;
   }
 
-  async findAll() {
-    return await this.orderRepository.find();
-  }
+  async findAll(
+    id?: number,
+    status?: string,
+    createdAt?: string,
+    updatedAt?: string,
+    items?: string,
+  ) {
+    if (status && !Object.values(OrderStatus).includes(status as OrderStatus)) {
+      throw new BadRequestException(
+        `Status inválido. Os valores permitidos são: ${Object.values(OrderStatus).join(', ')}`,
+      );
+    }
+    const where: any = {
+      ...(id && { id }),
+      ...(status && { status }),
+      ...(createdAt && { createdAt: new Date(createdAt) }),
+      ...(updatedAt && { updatedAt: new Date(updatedAt) }),
+    };
 
+    if (items) {
+      where.items = {
+        name: ILike(`%${items}%`),
+      };
+    }
+
+    const [result] = await this.orderRepository.findAndCount({
+      where,
+      relations: ['customer', 'items'],
+    });
+
+    return result;
+  }
   async findOne(id: number) {
-    const order = await this.orderRepository.findOne({ where: { id } });
+    const order = await this.orderRepository.findOne({
+      where: { id },
+      relations: ['customer', 'items'],
+    });
     if (!order) {
       throw new NotFoundException(`Order with ID ${id} not found`);
     }
@@ -80,16 +110,19 @@ export class OrdersService {
   }
 
   async update(id: number, updateOrderDto: UpdateOrderDto) {
-    const order = await this.findOne(id);
+    const order = await this.orderRepository.findOne({
+      where: { id },
+      relations: ['items'],
+    });
+
     if (!order) {
       throw new NotFoundException(`Order with ID ${id} not found`);
     }
 
     const { items, ...orderData } = updateOrderDto;
 
-    let updatedItems = order.items;
-    if (items && items.length > 0) {
-      updatedItems = await Promise.all(
+    if (items) {
+      const newItems = await Promise.all(
         items.map(async (itemId) => {
           const item = await this.itemsService.findOne(itemId);
           if (!item) {
@@ -98,14 +131,15 @@ export class OrdersService {
           return item;
         }),
       );
+
+      order.items = newItems;
     }
 
-    const updatedOrder = this.orderRepository.merge(order, {
-      ...orderData,
-      items: updatedItems,
-    });
+    Object.assign(order, orderData);
 
-    await this.orderRepository.save(updatedOrder);
+    const updatedOrder = await this.orderRepository.save(order);
+
+    this.kafkaClient.emit('order.updated', JSON.stringify(updatedOrder));
 
     await this.elasticsearchService.update({
       index: 'orders',
@@ -113,7 +147,9 @@ export class OrdersService {
       doc: JSON.parse(JSON.stringify(updatedOrder)),
     });
 
-    return updatedOrder;
+    return {
+      message: `Order ${id} updated successfully`,
+    };
   }
 
   async remove(id: number) {

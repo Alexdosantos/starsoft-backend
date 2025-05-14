@@ -5,8 +5,9 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -20,7 +21,8 @@ export class Order {
   @Column({ type: 'enum', enum: OrderStatus })
   status: OrderStatus;
 
-  @OneToMany(() => Item, (item) => item.order, { cascade: true })
+  @ManyToMany(() => Item, (item) => item.order, { cascade: true })
+  @JoinTable()
   items: Item[];
 
   @ManyToOne(() => Customer, (customer) => customer.orders)

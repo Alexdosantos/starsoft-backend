@@ -31,8 +31,8 @@ export class CustomersController {
     description: 'Item created',
     type: CreateCustomerDto,
   })
-  create(@Body() createCustomerDto: CreateCustomerDto) {
-    return this.customersService.create(createCustomerDto);
+  async create(@Body() createCustomerDto: CreateCustomerDto) {
+    return await this.customersService.create(createCustomerDto);
   }
 
   @Get()
@@ -42,8 +42,8 @@ export class CustomersController {
     description: 'List of items',
     type: [CreateCustomerDto],
   })
-  findAll() {
-    return this.customersService.findAll();
+  async findAll() {
+    return await this.customersService.findAll();
   }
 
   @Get(':id')
@@ -54,8 +54,8 @@ export class CustomersController {
     description: 'Item found',
     type: CreateCustomerDto,
   })
-  findOne(@Param('id') id: string) {
-    return this.customersService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    return await this.customersService.findOne(+id);
   }
 
   @Patch(':id')
@@ -67,11 +67,11 @@ export class CustomersController {
     description: 'Item updated',
     type: CreateCustomerDto,
   })
-  update(
+  async update(
     @Param('id') id: string,
     @Body() updateCustomerDto: UpdateCustomerDto,
   ) {
-    return this.customersService.update(+id, updateCustomerDto);
+    return await this.customersService.update(+id, updateCustomerDto);
   }
 
   @Delete(':id')

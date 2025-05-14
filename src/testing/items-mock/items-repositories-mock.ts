@@ -14,7 +14,7 @@ export const itemsRepositoryMock = {
         id: 1,
         ...itemMock,
       },
-    ]), // ✅ Aqui está o correto
+    ]),
     findOne: jest.fn().mockResolvedValue({
       id: 1,
       ...itemMock,
@@ -31,10 +31,9 @@ export const itemsRepositoryMock = {
       id: 1,
       ...itemMock,
     }),
+    findAndCount: jest.fn().mockResolvedValue([[], 0]),
     remove: jest
       .fn()
-      .mockImplementation((id: number) =>
-        Promise.resolve({ message: 'Item deleted successfully' }),
-      ),
+      .mockResolvedValue({ message: 'Item deleted successfully' }),
   },
 };

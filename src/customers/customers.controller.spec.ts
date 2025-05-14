@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CustomersController } from './customers.controller';
 import { CustomersService } from './customers.service';
-import { CreateCustomerDto } from './dto/create-customer.dto';
 import { customersServiceMock } from '../testing/customers-mock/customers-service-mock';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
+import { customerMock } from '../testing/customers-mock/customerMock';
 
 describe('CustomersController', () => {
   let controller: CustomersController;
@@ -24,11 +24,7 @@ describe('CustomersController', () => {
   });
 
   it('should create a customer', async () => {
-    const createCustomerDto: CreateCustomerDto = {
-      name: 'John Doe',
-      email: 'john.doe@example.com',
-      phone: '123456789',
-    };
+    const createCustomerDto = customerMock;
 
     const result = await controller.create(createCustomerDto);
     expect(result).toBeDefined();

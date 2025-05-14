@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -44,8 +45,20 @@ export class OrdersController {
   @Get()
   @ApiOperation({ summary: 'Find all orders' })
   @ApiResponse({ status: 200, description: 'List of orders', type: [Order] })
-  findAll() {
-    return this.ordersService.findAll();
+  async findAll(
+    @Query('id') id?: string,
+    @Query('status') status?: string,
+    @Query('createdAt') createdAt?: string,
+    @Query('updatedAt') updatedAt?: string,
+    @Query('items') items?: string,
+  ) {
+    return await this.ordersService.findAll(
+      +id,
+      status,
+      createdAt,
+      updatedAt,
+      items,
+    );
   }
 
   @Get(':id')
@@ -66,18 +79,38 @@ export class OrdersController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.ordersService.remove(+id);
+  async remove(@Param('id') id: string) {
+    return await this.ordersService.remove(+id);
   }
 
+  @Get('search-elasticsearch')
+  @ApiOperation({ summary: 'Search orders using Elasticsearch' })
+  @ApiResponse({
+    status: 200,
+    description: 'Search results from Elasticsearch',
+    type: [Order],
+  })
   @EventPattern('order.created')
   handleOrderCreated(@Payload() payload: Order, @Ctx() context: KafkaContext) {
-    console.log('[Kafka] Evento recebido:', payload);
-
+    console.log('payload created', payload);
     const message = context.getMessage();
-    console.log('[Kafka key]', message.key);
-    console.log('[Kafka offset]', message.offset);
-    console.log('[Kafka value]', message.value);
-    console.log('[timestamp]', message.timestamp);
+    console.log('[Kafka] order.created received:', {
+      key: message.key,
+      offset: message.offset,
+      value: message.value,
+      timestamp: message.timestamp,
+    });
+  }
+
+  @EventPattern('order.updated')
+  handleOrderUpdated(@Payload() payload: Order, @Ctx() context: KafkaContext) {
+    console.log('payload', payload);
+    const message = context.getMessage();
+    console.log('[Kafka] order.updated received:', {
+      key: message.key,
+      offset: message.offset,
+      value: message.value,
+      timestamp: message.timestamp,
+    });
   }
 }

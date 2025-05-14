@@ -4,7 +4,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  ManyToOne,
+  ManyToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -23,7 +23,7 @@ export class Item {
   @Column({ type: 'int' })
   quantity: number;
 
-  @ManyToOne(() => Order, (order) => order.items)
+  @ManyToMany(() => Order, (order) => order.items)
   order: Order;
 
   @CreateDateColumn({ type: 'timestamp' })

@@ -23,6 +23,10 @@ async function bootstrap() {
       },
     },
   });
+  const config = app.get(ConfigService);
+  app.setGlobalPrefix('api/v1');
+  app.enableCors();
+
   const configSwagger = new DocumentBuilder()
     .setTitle('Starsoft API')
     .setDescription('Starsoft API description')
@@ -30,10 +34,6 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, configSwagger);
   SwaggerModule.setup('api/v1/docs', app, document);
-
-  const config = app.get(ConfigService);
-  app.setGlobalPrefix('api/v1');
-  app.enableCors();
 
   app.useGlobalPipes(
     new ValidationPipe({

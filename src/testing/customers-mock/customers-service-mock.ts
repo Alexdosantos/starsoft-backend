@@ -28,8 +28,6 @@ export const customersServiceMock = {
     }),
     remove: jest
       .fn()
-      .mockImplementation((id: number) =>
-        Promise.resolve({ message: 'Customer deleted successfully' }),
-      ),
+      .mockResolvedValue({ message: 'Customer deleted successfully' }),
   },
 };

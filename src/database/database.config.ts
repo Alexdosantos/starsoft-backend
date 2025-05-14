@@ -21,7 +21,7 @@ export default <TypeOrmModuleAsyncOptions>{
       database: configService.get<string>('DB_NAME'),
       entities: [`${__dirname}/../**/*.entity.{js,ts}`],
       synchronize: false,
-      // logging: true,
+      logging: false,
     };
   },
 };
